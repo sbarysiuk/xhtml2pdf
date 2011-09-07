@@ -226,6 +226,7 @@ def CSSCollect(node, c):
         cssAttrMap = {}
         for cssAttrName in attrNames:
             try:
+                #log.debug("CSSCollect: type=%s, node=%s, attr=%s, value=%s" % (node.__class__, node.tagName, cssAttrName, node.getCSSAttr(c.cssCascade, cssAttrName)))
                 cssAttrMap[cssAttrName] = node.getCSSAttr(c.cssCascade, cssAttrName)
             #except LookupError:
             #    pass
@@ -234,11 +235,19 @@ def CSSCollect(node, c):
     return node.cssAttrs
 
 def CSS2Frag(c, kw, isBlock):
+
+    def safeGetColor(color, default = None):
+        try:
+            return getColor(color)
+        except ValueError:
+            # the css parser is responsible for calculating of inherited values so inherit do not work here
+            return getColor(default)
+
     # COLORS
     if c.cssAttr.has_key("color"):
-        c.frag.textColor = getColor(c.cssAttr["color"])
+        c.frag.textColor = safeGetColor(c.cssAttr["color"], default="#000000")
     if c.cssAttr.has_key("background-color"):
-        c.frag.backColor = getColor(c.cssAttr["background-color"])
+        c.frag.backColor = safeGetColor(c.cssAttr["background-color"], default="#ffffff")
     # FONT SIZE, STYLE, WEIGHT
     if c.cssAttr.has_key("font-family"):
         c.frag.fontName = c.getFontName(c.cssAttr["font-family"])
@@ -333,7 +342,6 @@ def CSS2Frag(c, kw, isBlock):
     # BORDERS
     if isBlock:
         if c.cssAttr.has_key("border-top-width"):
-            # log.debug(c.cssAttr["border-top-width"])
             c.frag.borderTopWidth = getSize(c.cssAttr["border-top-width"], c.frag.fontSize)
         if c.cssAttr.has_key("border-bottom-width"):
             c.frag.borderBottomWidth = getSize(c.cssAttr["border-bottom-width"], c.frag.fontSize)
@@ -350,13 +358,13 @@ def CSS2Frag(c, kw, isBlock):
         if c.cssAttr.has_key("border-right-style"):
             c.frag.borderRightStyle = c.cssAttr["border-right-style"]
         if c.cssAttr.has_key("border-top-color"):
-            c.frag.borderTopColor = getColor(c.cssAttr["border-top-color"])
+            c.frag.borderTopColor = safeGetColor(c.cssAttr["border-top-color"], default="#ffffff")
         if c.cssAttr.has_key("border-bottom-color"):
-            c.frag.borderBottomColor = getColor(c.cssAttr["border-bottom-color"])
+            c.frag.borderBottomColor = getSafeColor(c.cssAttr["border-bottom-color"], default="#ffffff")
         if c.cssAttr.has_key("border-left-color"):
-            c.frag.borderLeftColor = getColor(c.cssAttr["border-left-color"])
+            c.frag.borderLeftColor = safeGetColor(c.cssAttr["border-left-color"], default="#ffffff")
         if c.cssAttr.has_key("border-right-color"):
-            c.frag.borderRightColor = getColor(c.cssAttr["border-right-color"])
+            c.frag.borderRightColor = safeGetColor(c.cssAttr["border-right-color"], default="#ffffff")
 
 def pisaPreLoop(node, context, collect=False):
     """
@@ -428,7 +436,6 @@ def pisaLoop(node, context, path=[], **kw):
 
     # ELEMENT
     elif node.nodeType == Node.ELEMENT_NODE:
-
         node.tagName = node.tagName.replace(":", "").lower()
 
         if node.tagName in ("style", "script"):
@@ -438,7 +445,7 @@ def pisaLoop(node, context, path=[], **kw):
 
         # Prepare attributes
         attr = pisaGetAttributes(context, node.tagName, node.attributes)
-        # log.debug(indent + "<%s %s>" % (node.tagName, attr) + repr(node.attributes.items())) #, path
+        #log.debug("pisaLoop: prepare <%s %s>" % (node.tagName, attr) + repr(node.attributes.items())) #, path
 
         # Calculate styles
         context.cssAttr = CSSCollect(node, context)
@@ -454,6 +461,7 @@ def pisaLoop(node, context, path=[], **kw):
         display = context.cssAttr.get("display", "inline").lower()
         # print indent, node.tagName, display, context.cssAttr.get("background-color", None), attr
         isBlock = (display == "block")
+        #log.debug("pisaLoop: display: %s" % display);
         if isBlock:
             context.addPara()
 
@@ -532,6 +540,7 @@ def pisaLoop(node, context, path=[], **kw):
         # BEGIN tag
         klass = globals().get("pisaTag%s" % node.tagName.replace(":", "").upper(), None)
         obj = None
+        #log.debug("pisaLoop: begin tag: %s" % node.tagName)
 
         # Static block
         elementId = attr.get("id", None)
@@ -542,6 +551,7 @@ def pisaLoop(node, context, path=[], **kw):
 
         # Tag specific operations
         if klass is not None:
+            #log.debug("pisaLoop: klass=%s, attr=%s" % (klass, attr))
             obj = klass(node, attr)
             obj.start(context)
 
@@ -554,6 +564,7 @@ def pisaLoop(node, context, path=[], **kw):
         # END tag
         if obj:
             obj.end(context)
+        #log.debug("pisaLoop: end tag: %s" % node.tagName)
 
         # Block?
         if isBlock:
