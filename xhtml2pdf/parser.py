@@ -360,7 +360,7 @@ def CSS2Frag(c, kw, isBlock):
         if c.cssAttr.has_key("border-top-color"):
             c.frag.borderTopColor = safeGetColor(c.cssAttr["border-top-color"], default="#ffffff")
         if c.cssAttr.has_key("border-bottom-color"):
-            c.frag.borderBottomColor = getSafeColor(c.cssAttr["border-bottom-color"], default="#ffffff")
+            c.frag.borderBottomColor = safeGetColor(c.cssAttr["border-bottom-color"], default="#ffffff")
         if c.cssAttr.has_key("border-left-color"):
             c.frag.borderLeftColor = safeGetColor(c.cssAttr["border-left-color"], default="#ffffff")
         if c.cssAttr.has_key("border-right-color"):
