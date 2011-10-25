@@ -159,8 +159,7 @@ def getColor(value, default=None):
         return value
 
     try:
-        value = parse_color(value)
-        value = str(value).strip().lower()
+        value = str(parse_color(value)).strip().lower()
     except:
         value = default
 
