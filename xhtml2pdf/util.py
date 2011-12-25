@@ -530,7 +530,7 @@ class pisaFileObject:
         self.local = None
         self.tmp_file = None
 
-        uri = str(uri)
+        uri = unicode(uri)
 
         # Data URI
         if uri.startswith("data:"):
