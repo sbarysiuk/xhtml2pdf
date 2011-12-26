@@ -292,8 +292,8 @@ class pisaTagIMG(pisaTag):
                     img.drawHeight *= factor
                     img.drawWidth = getSize(width)
                 elif (width is not None) and (height is not None):
-                    img.drawWidth = getSize(width)
-                    img.drawHeight = getSize(height)
+                    img.drawWidth = getSize(width) or img.drawWidth
+                    img.drawHeight = getSize(height) or img.drawHeight
 
                 img.drawWidth *= img.pisaZoom
                 img.drawHeight *= img.pisaZoom
@@ -314,12 +314,8 @@ class pisaTagIMG(pisaTag):
 
                 c.force = True
                 if align in ["left", "right"]:
-
                     c.image = img
-                    c.imageData = dict(
-                        align=align
-                        )
-
+                    c.imageData = dict(align=align)
                 else:
 
                     # Important! Make sure that cbDefn is not inherited by other
