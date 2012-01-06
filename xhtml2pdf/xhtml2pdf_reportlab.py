@@ -228,8 +228,8 @@ class PmlPageTemplate(PageTemplate):
                         factor_min = min(wfactor, hfactor)
 
                         if self.isPortrait():
-                            w = iw * factor_min
-                            h = ih * factor_min
+                            w = iw * wfactor # factor_min
+                            h = ih * wfactor # factor_min
                             canvas.drawImage(img, 0, ph - h, w, h)
                         elif self.isLandscape():
                             factor_max = max(wfactor, hfactor)
