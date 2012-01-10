@@ -298,6 +298,14 @@ class pisaTagIMG(pisaTag):
                 img.drawWidth *= img.pisaZoom
                 img.drawHeight *= img.pisaZoom
 
+                pw, ph = c.pageSize
+                if pw < img.drawWidth or ph < img.drawHeight:
+                    pw *= 0.8 # some euristic factor
+                    ph *= 0.8 # some euristic factor
+                    factor = min(float(pw) / img.drawWidth, float(ph) / img.drawHeight)
+                    img.drawWidth *= factor
+                    img.drawHeight *= factor
+
                 img.spaceBefore = c.frag.spaceBefore
                 img.spaceAfter = c.frag.spaceAfter
 
