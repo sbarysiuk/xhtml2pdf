@@ -529,6 +529,10 @@ class PmlParagraph(Paragraph, PmlMaxHeightMixIn):
                 img = frag.cbDefn
                 # print "before", img.width, img.height
                 width = min(img.width, availWidth)
+
+                img.width = img.width or (img.image and img.image.imageWidth)
+                img.height = img.height or (img.image and img.image.imageHeight)
+
                 wfactor = float(width) / img.width
                 height = min(img.height, availHeight * MAX_IMAGE_RATIO)  # XXX 99% because 100% do not work...
                 hfactor = float(height) / img.height
