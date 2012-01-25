@@ -284,16 +284,16 @@ class pisaTagIMG(pisaTag):
                 img.drawWidth *= dpi96
 
                 if (width is None) and (height is not None):
-                    factor = getSize(height) / img.drawHeight
+                    factor = getSize(height, relative=img.drawHeight) / img.drawHeight
                     img.drawWidth *= factor
-                    img.drawHeight = getSize(height)
+                    img.drawHeight = getSize(height, img.drawHeight)
                 elif (height is None) and (width is not None):
-                    factor = getSize(width) / img.drawWidth
+                    factor = getSize(width, relative=img.drawWidth) / img.drawWidth
                     img.drawHeight *= factor
-                    img.drawWidth = getSize(width)
+                    img.drawWidth = getSize(width, relative=img.drawWidth)
                 elif (width is not None) and (height is not None):
-                    img.drawWidth = getSize(width) or img.drawWidth
-                    img.drawHeight = getSize(height) or img.drawHeight
+                    img.drawWidth = getSize(width, relative=img.drawWidth) or img.drawWidth
+                    img.drawHeight = getSize(height, relative=img.drawHeight) or img.drawHeight
 
                 img.drawWidth *= img.pisaZoom
                 img.drawHeight *= img.pisaZoom
