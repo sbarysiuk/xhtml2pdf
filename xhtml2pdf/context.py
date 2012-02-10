@@ -167,12 +167,13 @@ class pisaCSSBuilder(css.CSSBuilder):
         # Font style
         italic = str(data.get("font-style", "")).lower() in ("italic", "oblique")
 
-        src = self.c.getFile(data["src"])
-        self.c.loadFont(
-            names,
-            src,
-            bold=bold,
-            italic=italic)
+        src = data.get("src", None)
+        if src:
+            self.c.loadFont(
+                names,
+                self.c.getFile(src),
+                bold=bold,
+                italic=italic)
         return {}, {}
 
     def _pisaAddFrame(self, name, data, first=False, border=None, size=(0,0)):
@@ -247,7 +248,7 @@ class pisaCSSBuilder(css.CSSBuilder):
         frameList = []
         staticList = []
         for fname, static, border, x, y, w, h in c.frameList:
-            x, y, w, h = getCoords(x, y, w, h, c.pageSize)
+            x, y, w, h = getCoords(x, y, w, h, tuple(c.pageSize))
             if w <= 0 or h <= 0:
                 log.warn(self.c.warning("Negative width or height of frame. Check @frame definitions."))
             frame = Frame(
@@ -685,6 +686,7 @@ class pisaContext(object):
                         self.image,
                         side=self.imageData.get("align", "left"))
 
+
                 self.addStory(para)
 
             self.fragAnchor = []
@@ -901,7 +903,7 @@ class pisaContext(object):
             file = src
             src = file.uri
 
-            log.debug("Load font %r", src)
+            #log.debug("Load font %r", src)
 
             if type(names) is types.ListType:
                 fontAlias = names
