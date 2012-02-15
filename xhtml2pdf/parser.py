@@ -587,11 +587,12 @@ def pisaLoop(node, context, path=[], **kw):
             # it in a KeepInFrame
             substory = context.story[context.keepInFrameIndex:]
             context.story = context.story[:context.keepInFrameIndex]
-            context.story.append(
-                KeepInFrame(
-                    content=substory,
-                    maxWidth=keepInFrameMaxWidth,
-                    maxHeight=keepInFrameMaxHeight))
+            kwargs = dict(content=substory,
+                          maxWidth=keepInFrameMaxWidth,
+                          maxHeight=keepInFrameMaxHeight)
+            if keepInFrameMode:
+                kwargs['mode'] = keepInFrameMode
+            context.story.append(KeepInFrame(**kwargs))
             context.keepInFrameIndex = None
 
         # Static block, END
