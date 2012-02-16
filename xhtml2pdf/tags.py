@@ -50,6 +50,7 @@ class pisaTag:
     def end(self, c):
         pass
 
+
 class pisaTagBODY(pisaTag):
 
     """
@@ -362,10 +363,11 @@ class pisaTagHR(pisaTag):
 
     def start(self, c):
         c.addPara()
+        width = self.attr.get('width', "100%") or "100%"
         c.addStory(HRFlowable(
             color=self.attr.color,
             thickness=self.attr.size,
-            width=self.attr.get('width', "100%") or "100%",
+            width=width.replace('"', '').replace('\'', ''),
             spaceBefore=c.frag.spaceBefore,
             spaceAfter=c.frag.spaceAfter
             ))
