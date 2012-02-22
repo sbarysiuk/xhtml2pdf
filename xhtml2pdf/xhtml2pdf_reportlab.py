@@ -425,12 +425,16 @@ class PmlImageReader(object):  # TODO We need a factory here, returning either a
             return None
         else:
             if self._image.info.has_key("transparency"):
-                transparency = self._image.info["transparency"] * 3
+                transparency =  self._image.info["transparency"] * 3
+                if type(transparency) != int:
+                    return None
+
                 palette = self._image.palette
                 try:
                     palette = palette.palette
                 except:
                     palette = palette.data
+
                 return map(ord, palette[transparency:transparency + 3])
             else:
                 return None
