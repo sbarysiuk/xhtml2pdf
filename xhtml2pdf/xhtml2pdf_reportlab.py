@@ -427,7 +427,7 @@ class PmlImageReader(object):  # TODO We need a factory here, returning either a
             if self._image.info.has_key("transparency"):
                 transparency =  self._image.info["transparency"] * 3
                 if type(transparency) != int:
-                    return None
+                    return [255,255,255]
 
                 palette = self._image.palette
                 try:
