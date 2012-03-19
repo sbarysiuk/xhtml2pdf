@@ -176,8 +176,11 @@ def getColor(value, default=None):
     else:
         # Shrug
         pass
-
-    return toColor(value, default) # Calling the reportlab function
+    try:
+        color = toColor(value, default) # Calling the reportlab function
+    except:
+        color = default
+    return color
 
 def getBorderStyle(value, default=None):
     # log.debug(value)
