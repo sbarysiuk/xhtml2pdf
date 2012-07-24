@@ -17,13 +17,15 @@
 from hashlib import md5
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.utils import flatten, open_for_read, getStringIO, \
-    LazyImageReader, haveImages
+from reportlab.lib.utils import flatten, open_for_read, getStringIO, LazyImageReader, haveImages
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
-from reportlab.platypus.flowables import Flowable, CondPageBreak, \
-    KeepInFrame, ParagraphAndImage
+from reportlab.platypus.flowables import Flowable, CondPageBreak, KeepInFrame, ParagraphAndImage, \
+     _Container, _listWrapOn, _qsolve, _hmodel
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import Table, TableStyle
+from reportlab.platypus.doctemplate import LayoutError
+from reportlab.rl_config import _FUZZ
+
 from xhtml2pdf.reportlab_paragraph import Paragraph
 from xhtml2pdf.util import getUID, getBorderStyle
 from types import StringType, TupleType, ListType, IntType
@@ -711,12 +713,91 @@ class PmlParagraph(Paragraph, PmlMaxHeightMixIn):
 
 class PmlKeepInFrame(KeepInFrame, PmlMaxHeightMixIn):
 
+    def drawOn(self, canv, x, y, _sW=0):
+        """ safe version of reportlab method """
+        scale = getattr(self,'_scale', 1.0) or 1.0
+        truncate = self.mode=='truncate'
+        ss = scale!=1.0 or truncate
+        if ss:
+            canv.saveState()
+            if truncate:
+                p = canv.beginPath()
+                p.rect(x, y, self.width,self.height)
+                canv.clipPath(p,stroke=0)
+            else:
+                canv.translate(x,y)
+                x=y=0
+                canv.scale(1.0/scale, 1.0/scale)
+        _Container.drawOn(self, canv, x, y, _sW=_sW, scale=scale)
+        if ss: canv.restoreState()
+
     def wrap(self, availWidth, availHeight):
         availWidth = max(availWidth, 1.0)
         self.maxWidth = availWidth
         self.maxHeight = self.setMaxHeight(availHeight)
-        return KeepInFrame.wrap(self, availWidth, availHeight)
+        return self.safe_wrap(availWidth, availHeight)
 
+    def safe_wrap(self, availWidth, availHeight):
+        """ safe version of reportlab method """
+        mode = self.mode
+        maxWidth = float(min(self.maxWidth or availWidth,availWidth))
+        maxHeight = float(min(self.maxHeight or availHeight,availHeight))
+        W, H = _listWrapOn(self._content,maxWidth,self.canv)
+        if (mode=='error' and (W>maxWidth+_FUZZ or H>maxHeight+_FUZZ)):
+            ident = 'content %sx%s too large for %s' % (W,H,self.identity(30))
+            #leave to keep apart from the raise
+            raise LayoutError(ident)
+        elif W<=maxWidth+_FUZZ and H<=maxHeight+_FUZZ:
+            self.width = W-_FUZZ      #we take what we get
+            self.height = H-_FUZZ
+        elif mode in ('overflow','truncate'):   #we lie
+            self.width = min(maxWidth,W)-_FUZZ
+            self.height = min(maxHeight,H)-_FUZZ
+        else:
+            def func(x):
+                W, H = _listWrapOn(self._content,x*maxWidth,self.canv)
+                if x:
+                    W /= x
+                    H /= x
+                return W, H
+            W0 = W
+            H0 = H
+            s0 = 1
+            if W>maxWidth+_FUZZ:
+                #squeeze out the excess width and or Height
+                s1 = W/maxWidth
+                W, H = func(s1)
+                if H<=maxHeight+_FUZZ:
+                    self.width = W-_FUZZ
+                    self.height = H-_FUZZ
+                    self._scale = s1
+                    return W,H
+                s0 = s1
+                H0 = H
+                W0 = W
+            s1 = H/maxHeight
+            W, H = func(s1)
+            self.width = W-_FUZZ
+            self.height = H-_FUZZ
+            self._scale = s1
+            if H<min(0.95*maxHeight,maxHeight-10) or H>=maxHeight+_FUZZ:
+                #the standard case W should be OK, H is short we want
+                #to find the smallest s with H<=maxHeight
+                H1 = H
+                for f in 0, 0.01, 0.05, 0.10, 0.15:
+                    #apply the quadratic model
+                    if not s0 or not s1:
+                        s = 0.0
+                    else:
+                        s = _qsolve(maxHeight*(1-f),_hmodel(s0,s1,H0,H1))
+                    W, H = func(s)
+                    if H<=maxHeight+_FUZZ and W<=maxWidth+_FUZZ:
+                        self.width = W-_FUZZ
+                        self.height = H-_FUZZ
+                        self._scale = s
+                        break
+
+        return self.width, self.height
 
 class PmlTable(Table, PmlMaxHeightMixIn):
 
