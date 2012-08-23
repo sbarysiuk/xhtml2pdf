@@ -247,7 +247,7 @@ def _putFragLine(cur_x, tx, line):
             cur_x_s = cur_x + nSpaces*ws
             if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
                 tx._setFont(f.fontName, f.fontSize)
-            if xs.textColor!=f.textColor:
+            if f.textColor and xs.textColor!=f.textColor:
                 xs.textColor = f.textColor
                 tx.setFillColor(f.textColor)
             if xs.rise!=f.rise:
