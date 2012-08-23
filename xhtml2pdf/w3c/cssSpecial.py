@@ -234,8 +234,8 @@ def parseSpecialRules(declarations, debug=0):
                 # XXX We do not receive url() and parts list, so we go for a dirty work arround
                 part = getNextPart(parts) or oparts
                 if part:
-
-                    if ("." in part) or ("data:" in part):
+                    # background: rgb(x, y, z)
+                    if hasattr(part, '__contains__') and (("." in part) or ("data:" in part)):
                         dd.append(("background-image", part, last))
                     else:
                         dd.append(("background-color", part, last))

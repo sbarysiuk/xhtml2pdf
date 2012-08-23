@@ -471,7 +471,10 @@ class CSSTerminalFunction(object):
         self.params = params
 
     def __repr__(self):
-        return '<CSS function: %s(%s)>' % (self.name, ', '.join(self.params))
+        return '%s(%s)' % (self.name, ', '.join(self.params))
+
+    def __unicode__(self):
+        return '%s(%s)' % (self.name, ', '.join(self.params))
 
 class CSSTerminalOperator(tuple):
     def __new__(klass, *args):
