@@ -238,6 +238,8 @@ def CSS2Frag(c, kw, isBlock):
 
     def safeGetColor(color, default = None):
         try:
+            if isinstance(color, list):
+                color = tuple(color)
             return getColor(color)
         except ValueError:
             # the css parser is responsible for calculating of inherited values so inherit do not work here
