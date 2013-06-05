@@ -186,8 +186,8 @@ class pisaCSSBuilder(css.CSSBuilder):
         #    return None
         if first:
             return (name, None, data.get("-pdf-frame-border", border), x, y, w, h)
-        
-        return (name, data.get("-pdf-frame-content", None), 
+
+        return (name, data.get("-pdf-frame-content", None),
                 data.get("-pdf-frame-border", border), x, y, w, h)
 
     def atPage(self, name, pseudopage, declarations):
@@ -318,13 +318,13 @@ class pisaCSSBuilder(css.CSSBuilder):
         if declarations:
             result = self.ruleset([self.selector('*')], declarations)
             # print "@BOX", name, declarations, result
-            
+
             data = result[0]
             if data:
                 data = data.values()[0]
                 self.c.frameList.append(
                     self._pisaAddFrame(name, data, size=self.c.pageSize))
-            
+
         return {}, {} # TODO: It always returns empty dicts?
 
 class pisaCSSParser(css.CSSParser):
@@ -759,7 +759,8 @@ class pisaContext(object):
         text = (text
             .replace(u"\xad", u"")
             .replace(u"\xc2\xa0", NBSP)
-            .replace(u"\xa0", NBSP))
+            .replace(u"\xa0", NBSP)
+            .replace(NBSP, u" "))
 
         # log.debug("> %r", text)
 
@@ -993,4 +994,3 @@ class pisaContext(object):
 
             else:
                 log.warning(self.warning("wrong attributes for <pdf:font>"))
-
