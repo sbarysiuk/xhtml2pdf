@@ -367,6 +367,21 @@ class CSSParser(object):
         """Parses CSS inline source string using the current cssBuilder.
         Use to parse a tag's 'sytle'-like attribute."""
 
+        ######################################################################
+        # # HACK!!!                                                          #
+        # # parseInline doesn't have support for `!important` closure        #
+        # # so lets protect function and strip of any `!important` substring #
+        ######################################################################
+
+        try:
+            # example
+            # >>> font-size:8px !important; font-weight: 400 !important'.replace('!important', '')
+            # u'font-size:8px ; font-weight: 400 '
+            src = src.replace('!important', '')
+
+        except:
+            pass
+
         self.cssBuilder.beginInline()
         try:
             try:
@@ -1074,4 +1089,3 @@ class CSSParser(object):
             return result.group(group), src[result.end():]
         else:
             return default, src
-
